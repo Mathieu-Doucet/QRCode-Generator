@@ -106,20 +106,88 @@ QRcode(){
 
    
     CoordXY Topleft(0,0);
-    CoordXY TopRight(DimensionQRcode-8, 0);
-    CoordXY Bottomleft(0, DimensionQRcode-8);
+    CoordXY TopRight(DimensionQRcode-7, 0);
+    CoordXY Bottomleft(0, DimensionQRcode-7);
     
-
+    // finding patterns
     InitialiseCorner(Topleft);
     InitialiseCorner(TopRight);
     InitialiseCorner(Bottomleft);
     
+    //timing patterns
+
+    // starts form the bottomright finding pattern and between the separators
+    CoordXY CursorVertical = {6,8};
+    CoordXY CursorHorizontal = {8,6};
+
+    //                   (DimensionQRcode - 8) -8 -1 = length between the two white separators (-1 for first index = 0)
+    for (int i = 0 ; i <= DimensionQRcode - 17 ; i++){
+
+        if ( i % 2 == 0){
+            InitialiseBlack(CursorHorizontal);
+            InitialiseBlack(CursorVertical);
+        }
+        else{
+            InitialiseWhite(CursorHorizontal);
+            InitialiseWhite(CursorVertical);
+        }
+        CursorHorizontal.X++;
+        CursorVertical.Y++;
+    }
+    
+
+
+
 
     
 }//QRcode
 
-void printQRcode(){
+void printQRcodeDebug(){
+    
+    // counters for dimensions
+    int Rows = 0;
+    int Columns = 0;
+    
+    // iteration for the columns
+    cout << "   ";
     for (int i = 0; i< QRcodeArray.size() ; i++ ){
+        cout << Columns;
+
+        // aligment
+        cout << (Columns <= 9 ? " " : "");
+        Columns++;
+
+    }
+    cout << endl;
+
+    // Normal PrintQRcode()
+    for (int i = 0; i< QRcodeArray.size() ; i++ ){
+        
+        // Iteration for the rows
+        cout << Rows << (Rows <= 9 ? "  " : " ");
+        Rows++;
+
+        for (int j = 0; j< QRcodeArray[i].size() ; j++ ){
+
+
+            QRcodeArray[i][j] == 1 ? printBlack() : printWhite();
+        
+        }
+        cout << endl;
+
+        
+
+    }
+
+
+}// PrintQRcodeDebug
+
+
+void printQRcode(){
+
+
+    for (int i = 0; i< QRcodeArray.size() ; i++ ){
+        
         
         for (int j = 0; j< QRcodeArray[i].size() ; j++ ){
 
@@ -128,11 +196,11 @@ void printQRcode(){
         
         }
         cout << endl;
+
     }
 
 
 }// PrintQRcode
-
 
 };//QRcode class
 
@@ -144,6 +212,10 @@ int main(){
     QRcode TestQRcode;
 
     TestQRcode.printQRcode();
+    
+    cout << endl << endl << endl;
+
+    TestQRcode.printQRcodeDebug();
 
     return 0;
 }
