@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <string>
 using namespace std;
 
 struct CoordXY{
@@ -12,7 +13,21 @@ struct CoordXY{
 };
 
 
+//                     7% 15% 25% 30%
+enum Errorcorrection { L , M , Q , H}; // https://www.thonky.com/qr-code-tutorial/data-encoding
+
+enum QRcodeMode {Numeric , AlphaNumeric, Byte, Kanji}; // https://www.thonky.com/qr-code-tutorial/data-analysis
+
 class QRcode{
+
+public:
+
+string URL;
+unsigned short Size : 6; // (max version is 40)
+Errorcorrection ErrorCorrection = L; // Light for now
+QRcodeMode Mode = Byte; // Byte is the standard for urls
+
+
 private:
 
 // qr code version 6 
