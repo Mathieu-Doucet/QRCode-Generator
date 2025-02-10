@@ -3,25 +3,16 @@
 #include <string>
 using namespace std;
 
-struct CoordXY{
-    short X;
-    short Y;
+//Important file for all the tables and help functions for the QRcode class
+#include "QRCodeHelp.hpp"
 
-    CoordXY(short x, short y){
-        X=x;   Y=y;
-    }
-};
-
-
-//                     7% 15% 25% 30%
-enum Errorcorrection { L , M , Q , H}; // https://www.thonky.com/qr-code-tutorial/data-encoding
-
-enum QRcodeMode {Numeric , AlphaNumeric, Byte, Kanji}; // https://www.thonky.com/qr-code-tutorial/data-analysis
 
 class QRcode{
 
 public:
 
+
+// Go look QRCodeHelp.hpp or the documentation for info on the Variables
 string URL;
 unsigned short Size : 6; // (max version is 40)
 Errorcorrection ErrorCorrection = L; // Light for now
