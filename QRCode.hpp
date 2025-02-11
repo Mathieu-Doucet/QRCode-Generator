@@ -11,28 +11,25 @@ class QRcode{
 
 public:
 
-
-// Go look QRCodeHelp.hpp or the documentation for info on the Variables
 string URL;
+
+private:
+
+// Go look QRCodeHelp.hpp or the documentation on the Variables
+short DimensionQRcode= 41;
 unsigned short Size : 6; // (max version is 40)
 Errorcorrection ErrorCorrection = L; // Light for now
 QRcodeMode Mode = Byte; // Byte is the standard for urls
 
 
-private:
-
-// qr code version 6 
-short DimensionQRcode= 41; 
-
-// allocate un array dynamic de 41 x 41
-vector<vector<int>> QRcodeArray = vector<vector<int>>(DimensionQRcode,(vector<int>(DimensionQRcode, 0)));
+// allocate an dynamic array initialized for version 6 QRcode for the standard url
+vector<vector<bool>> QRcodeArray = vector<vector<bool>>(DimensionQRcode,(vector<bool>(DimensionQRcode, 0)));
 
 
+// ////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-// ---------------------------------------------------
-
-// double cout le char pour faire le QR carre dans le terminal
+// double cout the char to make the the QRcode in the terminal a square
 void printBlack(){
     cout << "░" << "░";
 }
@@ -40,6 +37,7 @@ void printWhite(){
     cout << "▓" << "▓";
 }
 
+// place 
 void InitialiseBlack(CoordXY Coords){
     QRcodeArray[Coords.Y][Coords.X] = 1;
 }
@@ -47,7 +45,7 @@ void InitialiseWhite(CoordXY Coords){
     QRcodeArray[Coords.Y][Coords.X] = 0;
 }
 
-// initialise the a corner without the white borders 
+// initialise the corner without the white borders 
 void InitialiseCorner(CoordXY TopLeftCoords){
 
     // top left corner always the same (0,0) -> (7,7)
@@ -103,8 +101,7 @@ void InitialiseCorner(CoordXY TopLeftCoords){
 
 
 
-// ---------------------------------------------------------------------------
-
+// ////////////////////////////////////////////////////////////////////////////////////////////////
 
 public:
 
@@ -142,10 +139,6 @@ QRcode(){
     }
     
 
-
-
-
-    
 }//QRcode
 
 void printQRcodeDebug(){
@@ -212,16 +205,3 @@ void printQRcode(){
 
 
 
-int main(){
-
-
-    QRcode TestQRcode;
-
-    TestQRcode.printQRcode();
-    
-    cout << endl << endl << endl;
-
-    TestQRcode.printQRcodeDebug();
-
-    return 0;
-}
