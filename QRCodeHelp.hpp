@@ -16,6 +16,45 @@ struct CoordXY{
 };
 
 
+
+//Step 3: Add the alignment patterns
+//https://www.thonky.com/qr-code-tutorial/module-placement-matrix
+
+bool AlignmentPatternIsSafe (CoordXY Middle, const vector<vector<bool>> & FunctionPattern){
+
+
+    CoordXY TopLeftAlignment(Middle.X - 2, Middle.Y - 2);
+    CoordXY TopRightAlignment(Middle.X - 2, Middle.Y + 2);
+    CoordXY BottomLeftAlignment(Middle.X + 2, Middle.Y + 2);
+
+
+    // TODO: Optimisation posible?
+
+    if (FunctionPattern[Middle.Y][Middle.X] == 1){
+        return false;
+    }
+
+    else if (FunctionPattern[TopLeftAlignment.Y][TopLeftAlignment.X] == 1){
+        return false;
+    }
+
+    else if (FunctionPattern[TopRightAlignment.Y][TopRightAlignment.X] == 1){
+        return false;
+    }
+
+    else if (FunctionPattern[BottomLeftAlignment.Y][BottomLeftAlignment.X] == 1){
+        return false;
+    }
+
+    return true;
+    
+
+
+}
+
+
+
+
 //                     7% 15% 25% 30%
 enum Errorcorrection { L , M , Q , H}; // https://www.thonky.com/qr-code-tutorial/data-encoding
 
@@ -24,11 +63,11 @@ enum QRcodeMode {Numeric , AlphaNumeric, Byte, Kanji}; // https://www.thonky.com
 // Alighment table for the aligments locations
 // https://www.thonky.com/qr-code-tutorial/alignment-pattern-locations
 
-// Each permutation of the numbers in the table is the center coordenate for an aligment pattern
+// Each permutation of the numbers in the table is the center coordinate for an aligment pattern
 //  Version 2 : 6 and 18   ----> (6, 6), (6, 18), (18, 6) and (18, 18).
 
-// This table isnt nesessary but for future expansion its useful. their is a small formula but its a pain to code with all the exeptions
-vector<vector<int>> AlignmentTable = {
+// This table isnt nesessary for the algnment patterns but for future expansion its useful. *their is probably a formula for the coords but its a pain to code with all the exeptions
+vector<vector<short>> AlignmentTable = {
     {6,18},//2
     {6,22},//3
     {6 ,26},//4
