@@ -18,6 +18,7 @@ private:
 
     // Go look QRCodeHelp.hpp or the documentation on the Variables
     short DimensionQRcode= 41;
+    short Version = 6;
     unsigned short Size : 6; // (max version is 40)
     Errorcorrection ErrorCorrection = L; // Light for now
     QRcodeMode Mode = Byte; // Byte is the standard for urls
@@ -25,6 +26,9 @@ private:
 
     // allocate an dynamic array initialized for version 6 QRcode for the standard url
     vector<vector<bool>> QRcodeArray = vector<vector<bool>>(DimensionQRcode,(vector<bool>(DimensionQRcode, 0)));
+
+    // Allocate the same QRcode Size for places that CANT be modified because of the Function paterns (1 in the Array means occupied)
+    vector<vector<bool>> OccupiedVector = vector<vector<bool>>(DimensionQRcode,(vector<bool>(DimensionQRcode, 0)));
 
 
     // ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -38,13 +42,38 @@ private:
         cout << "▓" << "▓";
     }
 
-    // place 
+    void OccupySquare(CoordXY Coords){
+        OccupiedVector[Coords.Y][Coords.X] = 1;
+    }
+
+    //place a square in the QRcode 
     void InitialiseBlack(CoordXY Coords){
-        QRcodeArray[Coords.Y][Coords.X] = 1;
+        //place is not occupied
+        if (OccupiedVector[Coords.Y][Coords.X] == 0){
+            QRcodeArray[Coords.Y][Coords.X] = 1;
+        }
+        //is occupied (debugging)
+        else{
+            cout << "(" << Coords.X << "," <<  Coords.Y << ") Occupied" << endl;
+        }
+        
     }
+
     void InitialiseWhite(CoordXY Coords){
-        QRcodeArray[Coords.Y][Coords.X] = 0;
+        //place is not occupied
+        if (OccupiedVector[Coords.Y][Coords.X] == 0){
+            QRcodeArray[Coords.Y][Coords.X] = 0;
+        }
+        //is occupied (debugging)
+        else{
+            cout << "(" << Coords.X << "," <<  Coords.Y << ") Occupied" << endl;
+        }
     }
+
+
+    
+
+
 
     // initialise the corner without the white borders 
     void InitialiseCorner(CoordXY TopLeftCoords){
@@ -56,6 +85,7 @@ private:
             
             // Always starts with black
             InitialiseBlack(Cursor);
+            OccupySquare(Cursor);
             Cursor.X++;
 
             // column [1,5]
@@ -65,6 +95,7 @@ private:
                     
                 for (int Column = Cursor.X; Column < (TopLeftCoords.X + 6); Column++) {
                     InitialiseBlack(Cursor);
+                    OccupySquare(Cursor);
                     Cursor.X++;
                 }
                     
@@ -74,6 +105,7 @@ private:
                     
                 for (int Column = Cursor.X; Column < (TopLeftCoords.X +6); Column++) {
                     InitialiseWhite(Cursor);
+                    OccupySquare(Cursor);
                     Cursor.X++;
                 }
                     
@@ -83,18 +115,22 @@ private:
             else {
 
                 InitialiseWhite(Cursor);
+                OccupySquare(Cursor);
                 Cursor.X++;
 
                 for (int Column = Cursor.X; Column< (TopLeftCoords.X +5); Column++) {
                     InitialiseBlack(Cursor);
+                    OccupySquare(Cursor);
                     Cursor.X++;
                 }
                 InitialiseWhite(Cursor);
+                OccupySquare(Cursor);
                 Cursor.X++;
             }
 
             // Finishes with Black White
             InitialiseBlack(Cursor);
+            OccupySquare(Cursor);
 
         }
 
@@ -102,15 +138,21 @@ private:
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
-
-
-
 public:
 
+    // initiations of the QRcode
     QRcode(){
 
+
+        // the steps to initialising a QRcode
+        //https://www.thonky.com/qr-code-tutorial/module-placement-matrix
+
+        ////////////////////////////////////////////////
+        // Step 1: Add the Finder Patterns
+        ////////////////////////////////////////////////
+
     
+        // the coordanate of the most top left black square for the finding paterns
         CoordXY Topleft(0,0);
         CoordXY TopRight(DimensionQRcode-7, 0);
         CoordXY Bottomleft(0, DimensionQRcode-7);
@@ -120,22 +162,86 @@ public:
         InitialiseCorner(TopRight);
         InitialiseCorner(Bottomleft);
         
-        //timing patterns
+
+        ////////////////////////////////////////////////
+        // Step 2: Add the Separators
+        ////////////////////////////////////////////////
+        // the QR code is initiated as white so the separateurs are already there but needs to be occupied
+
+        //occupy the white separators in the corners
+        short Offset = DimensionQRcode-8;
+        for (int i = 0 ; i <= 7 ; ++i){
+            
+            //Vertical
+            // [Y][X]
+            OccupiedVector[i][7] = 1;
+            OccupiedVector[i][Offset] = 1;
+            OccupiedVector[i+Offset][7] = 1;
+
+            //Horizontal
+            // [Y][X]
+            OccupiedVector[7][i] = 1;
+            OccupiedVector[Offset][i] = 1;
+            OccupiedVector[7][i+Offset] = 1;
+        }
+
+        ////////////////////////////////////////////////
+        // Step 3: Add the Alignment Patterns
+        ////////////////////////////////////////////////
+    
+        //TODO
+        //-Make a aligment patterne function that initialises a single alignement patern (in the QRcode and the funtionpattern) 
+
+        // Each permutation of the numbers in the table is the center coordinate for an aligment pattern
+        //  Version 2 : 6 and 18   ----> (6, 6), (6, 18), (18, 6) and (18, 18).
+
+        vector<short> PossibleCoordinates= AlignmentTable[Version - 2];
+
+        /*
+        
+            if(AlignmentPaternIsSafe( middle coord of aligment patern, funstionPattern )){
+            
+                initialise the alignement paterne
+        
+            }
+
+
+            
+        */
+
+
+
+
+
+        ////////////////////////////////////////////////
+        // Step 4: Add the Timing Patterns
+        ////////////////////////////////////////////////
+
+        //modifided the order because if you had the Timing patern before the alignement paterne you dont have to check if their is an al
 
         // starts form the bottomright finding pattern and between the separators
         CoordXY CursorVertical = {6,8};
         CoordXY CursorHorizontal = {8,6};
+
+        
 
         //                   (DimensionQRcode - 8) -8 -1 = length between the two white separators (-1 for first index = 0)
         for (int i = 0 ; i <= DimensionQRcode - 17 ; i++){
 
             if ( i % 2 == 0){
                 InitialiseBlack(CursorHorizontal);
+                OccupySquare(CursorHorizontal);
+        
                 InitialiseBlack(CursorVertical);
+                OccupySquare(CursorVertical);
             }
             else{
                 InitialiseWhite(CursorHorizontal);
+                OccupySquare(CursorHorizontal);
+
                 InitialiseWhite(CursorVertical);
+                OccupySquare(CursorVertical);
+                
             }
             CursorHorizontal.X++;
             CursorVertical.Y++;
@@ -144,8 +250,73 @@ public:
 
     }//QRcode
 
+
+
+
+
+
+
+ //////////////////////////////////////////////////////////////////////////////////////////////// 
+
+
+
+
+
+
+
+
+    // print the occupied squares of the QRcode
+    void printOccupyDebug(){
+
+        cout << "////////////////////////////////////////////////////////////////////////////////////////////////" << endl;
+        cout << "printOccupyDebug() \n" ;
+        cout << "////////////////////////////////////////////////////////////////////////////////////////////////" << endl << endl;
+
+        // counters for dimensions
+        int Rows = 0;
+        int Columns = 0;
+    
+        // iteration for the columns
+        cout << "   ";
+        for (int i = 0; i< OccupiedVector.size() ; i++ ){
+            cout << Columns;
+    
+            // aligment
+            cout << (Columns <= 9 ? " " : "");
+            Columns++;
+    
+        }
+        cout << endl;
+    
+        // Normal PrintQRcode()
+        for (int i = 0; i< OccupiedVector.size() ; i++ ){
+            
+            // Iteration for the rows
+            cout << Rows << (Rows <= 9 ? "  " : " ");
+            Rows++;
+    
+            for (int j = 0; j< OccupiedVector[i].size() ; j++ ){
+    
+    
+                OccupiedVector[i][j] == 1 ? printBlack() : printWhite();
+            
+            }
+            cout << endl;
+    
+
+        }
+
+        cout << "\n \n \n";
+
+    }//printOccupyDebug()
+
+
     void printQRcodeDebug(){
         
+        cout << "////////////////////////////////////////////////////////////////////////////////////////////////" << endl;
+        cout << "printQRcodeDebug() \n" ;
+        cout << "////////////////////////////////////////////////////////////////////////////////////////////////" << endl << endl;
+
         // counters for dimensions
         int Rows = 0;
         int Columns = 0;
@@ -181,6 +352,7 @@ public:
 
         }
 
+        cout << "\n \n \n";
 
     }// PrintQRcodeDebug
 

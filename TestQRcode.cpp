@@ -12,10 +12,13 @@ int main(){
 
     QRcode TestQRcode;
 
+    TestQRcode.printOccupyDebug();
+
+    TestQRcode.printQRcodeDebug();
+
     TestQRcode.printQRcode();
     cout << endl << endl << endl;
 
-    TestQRcode.printQRcodeDebug();
 
     return 0;
 }

@@ -5,9 +5,12 @@
 
 class QRcodeHeader{
 
-public:
+private:
 
-    // place 
+    //mark a square in the QRcode has occupied and cant be modified
+    virtual void OccupySquare() {}
+
+    // place a quare in the QRcode
     virtual void InitialiseBlack(CoordXY Coords){}
     virtual void InitialiseWhite(CoordXY Coords){}
 
@@ -23,9 +26,11 @@ public:
     //normal constructeur that builds all the components of 
     //QRcode(){}
 
+    
+    // print the occupied squares of the QRcode
+    virtual void printOccupyDebug(){}
 
-
-    // prints the QRcode so show the coordantes
+    // prints the QRcode to show the coordinates
     virtual void printQRcodeDebug(){}
 
     //prints the QRcode
