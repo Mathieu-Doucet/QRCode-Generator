@@ -9,8 +9,21 @@ using namespace std;
 
 int main(){
 
+    /*
+    // will make a default QRcode of version 6 that can fit [195-85 characters]
+    QRcode TestQRcodeDefault;
 
-    QRcode TestQRcode;
+    TestQRcodeDefault.printOccupyDebug();
+
+    TestQRcodeDefault.printQRcodeDebug();
+
+    TestQRcodeDefault.printQRcode();
+
+    */
+
+    //  https://www.qrcode.com/en/about/version.html
+    unsigned short version = 10;
+    QRcode TestQRcode(version);
 
     TestQRcode.printOccupyDebug();
 
