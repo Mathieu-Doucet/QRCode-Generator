@@ -71,7 +71,175 @@ private:
     }
 
 
+
+
+    //                                insert a funciton to be the condition of the mask (lamba)
+    void HelpApplyMaskWithCondition( bool (*condition) (int , int)) {
+
+        
+        // check every square in the QRcode if its not occupied and the condition is true
+        for (int row = 0 ; row < DimensionQRcode ; ++row){
+
+            for (int column = 0; column < DimensionQRcode ; ++column){
+
+                // if not occupied and the condition pointeur for the mask is true
+                if (OccupiedVector[row][column] == 0 && condition(row , column)){
+
+                    // flip the square in the QRcode
+                    QRcodeArray[row][column] = !QRcodeArray[row][column];
+
+                    //TODO : change the value of the message bit?
+
+                }
+
+            }
+
+        }
+
+
+
+    }
+
+
+
+    void ApplyMaskPattern(short Mask){
+
+        
+
+        // MaskPatterns[Veritasium] Visual representation for how each mask looks
+        // https://www.thonky.com/qr-code-tutorial/mask-patterns
+
+
+        // for every mask i define a lamba function for the condition in its respective case to save code space
+        switch (Mask){
+
+            //checkerboard pattern
+            case 0: {
+
+                //(row + column) mod 2 == 0
+                // define the condition using a lamba funciton
+                auto function = [] (int row , int column) { return (row + column) % 2 == 0 ;} ;
+
+                HelpApplyMaskWithCondition(function);
+
+
+            }break;
+            
+
+            // every even horizontal row is flipped
+            case 1: {
+                //(row) mod 2 == 0
+                // define the condition using a lamba funciton
+                auto function = [] (int row , int column) { return row  % 2 == 0 ;} ;
+
+                HelpApplyMaskWithCondition(function);
+
+        
+            }break;
+            
+            //every third column is inverted
+            case 2: {
+                //(column) mod 3 == 0
+                // define the condition using a lamba funciton
+                auto function = [] (int row , int column) { return column % 3 == 0 ;} ;
+                HelpApplyMaskWithCondition(function);
+
+            }break;
+
+            // checker board pattern every 3 row
+            case 3: {
+
+                //(row + column) mod 3 == 0
+                auto function = [] (int row , int column) { return (row + column) % 3 == 0 ;} ;
+                HelpApplyMaskWithCondition(function);
+
+            }break;
+
+            // big checkerboard pattern (2x3)
+            case 4: {
+                //( floor(row / 2) + floor(column / 3) ) mod 2 == 0
+                auto function = [] (int row , int column) { return ((row/2) + (column / 3)) % 2 == 0 ;} ;
+                HelpApplyMaskWithCondition(function);
+
+            }break;
+
+
+            /*
+            // plus in square
+            *the black inverts*
+            ░░ ░░ ░░ ░░ ░░ ░░ ░░
+            ░░ ▓▓ ▓▓ ▓▓ ▓▓ ▓▓ ░░
+            ░░ ▓▓ ▓▓ ░░ ▓▓ ▓▓ ░░
+            ░░ ▓▓ ░░ ▓▓ ░░ ▓▓ ░░
+            ░░ ▓▓ ▓▓ ░░ ▓▓ ▓▓ ░░
+            ░░ ▓▓ ▓▓ ▓▓ ▓▓ ▓▓ ░░
+            ░░ ░░ ░░ ░░ ░░ ░░ ░░
+            */
+            case 5: {
+                //((row * column) mod 2) + ((row * column) mod 3) == 0
+
+                auto function = [] (int row , int column) { return (((row * column) % 2) + ((row * column)% 3))== 0 ;} ;
+                HelpApplyMaskWithCondition(function);
+
+            }break;
+
+
+
+
+            /*
+            // amd logo
+            *the black inverts*
+            ░░ ░░ ░░ ░░ ░░ ░░ ░░
+            ░░ ░░ ░░ ▓▓ ▓▓ ▓▓ ░░
+            ░░ ░░ ▓▓ ░░ ░░ ▓▓ ░░
+            ░░ ▓▓ ░░ ▓▓ ░░ ▓▓ ░░
+            ░░ ▓▓ ░░ ░░ ▓▓ ░░ ░░
+            ░░ ▓▓ ▓▓ ▓▓ ░░ ░░ ░░
+            ░░ ░░ ░░ ░░ ░░ ░░ ░░
+            */
+
+            case 6: {
+                //( ((row * column) mod 2) + ((row * column) mod 3) ) mod 2 == 0
+                auto function = [] (int row , int column) { return (((row * column) % 2) + ((row * column)% 3)) % 2 == 0 ;} ;
+                HelpApplyMaskWithCondition(function);
+
+            }break;
+
+
+
+
+            // interlinked spining top
+            /*
+            *the black inverts*
+            ░░ ▓▓ ░░ ▓▓ 
+            ▓▓ ▓▓ ▓▓ ░░ 
+            ░░ ▓▓ ▓▓ ▓▓ 
+            ▓▓ ░░ ▓▓ ░░ 
+            ░░ ░░ ░░ ▓▓ 
+            ▓▓ ░░ ░░ ░░ 
+            ░░ ▓▓ ░░ ▓▓ 
+            */
+
+            case 7: {
+                //( ((row + column) mod 2) + ((row * column) mod 3) ) mod 2 == 0
+                auto function = [] (int row , int column) { return (((row + column) % 2) + ((row * column)% 3)) % 2 == 0 ;} ;
+                HelpApplyMaskWithCondition(function);
+
+            }break;
+
+
+
+            default:
+                cout << "mask failed?" <<  endl;
+
     
+
+        }
+
+
+        
+
+    }
 
 
 
@@ -382,6 +550,15 @@ public:
         cout << "////////////////////////////////////////////////////////////////////////////////////////////////" << endl;
         cout << "printOccupyDebug() \n" ;
         cout << "////////////////////////////////////////////////////////////////////////////////////////////////" << endl << endl;
+
+
+
+        // DEBUG mask
+        /////////////////////////////////////////////////
+        //ApplyMaskPattern(7);
+        /////////////////////////////////////////////////
+
+
 
         // counters for dimensions
         int Rows = 0;
