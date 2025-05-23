@@ -5,6 +5,40 @@
 using namespace std;
 
 
+/*
+important tables for information in the future
+
+How many characters can fit in each version of a QRcode
+https://www.thonky.com/qr-code-tutorial/character-capacities
+
+
+-Error correction tables Blocks and groups
+https://www.thonky.com/qr-code-tutorial/error-correction-table
+https://www.thonky.com/qr-code-tutorial/log-antilog-table
+
+-format and Version table (not useful can code my own algoright that can generate the Ecc for the format corner)
+https://www.thonky.com/qr-code-tutorial/format-version-tables
+
+-Alphanumeric table (letters availible in the alphanumeric mode)
+https://www.thonky.com/qr-code-tutorial/alphanumeric-table
+
+-Alignment pattern middle coordanates table 
+https://www.thonky.com/qr-code-tutorial/alignment-pattern-locations
+
+*/
+
+
+
+
+// TODO : funtion that returns the encoded of each mode (alphanumeric numeric and byte) (no kanji) (maybe ECI???)
+
+//https://www.thonky.com/qr-code-tutorial/alphanumeric-mode-encoding
+//https://www.thonky.com/qr-code-tutorial/numeric-mode-encoding
+//https://www.thonky.com/qr-code-tutorial/byte-mode-encoding
+
+
+
+
 
 struct CoordXY{
     short X;
@@ -52,13 +86,14 @@ bool AlignmentPatternIsSafe (CoordXY Middle, const vector<vector<bool>> & Functi
 
 }
 
+//https://www.thonky.com/qr-code-tutorial/format-version-information 
+//Error correction section says L = 1 , M = 0 , Q = 3 and H = 2
+//                     15%  7%  30% 25%
+enum Errorcorrection {  M , L , H , Q  }; // https://www.thonky.com/qr-code-tutorial/data-encoding
 
-
-
-//                     7% 15% 25% 30%
-enum Errorcorrection { L , M , Q , H}; // https://www.thonky.com/qr-code-tutorial/data-encoding
-
-enum QRcodeMode {Numeric , AlphaNumeric, Byte, Kanji}; // https://www.thonky.com/qr-code-tutorial/data-analysis
+//https://www.youtube.com/watch?v=w5ebcowAJD8 [14:46]
+// Numeric = 0001 , AlphaNumeric = 0010 , Binary = 0100 and Kanji = 1000
+enum QRcodeMode {Numeric = 1 , Alphanumeric = 2, Byte = 4, Kanji = 8}; // https://www.thonky.com/qr-code-tutorial/data-analysis
 
 // Alighment table for the aligments locations
 // https://www.thonky.com/qr-code-tutorial/alignment-pattern-locations

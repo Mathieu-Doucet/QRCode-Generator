@@ -21,6 +21,7 @@ private:
     unsigned short Version = 6; // (max version is 40)
     Errorcorrection ErrorCorrection = L; // Light for now
     QRcodeMode Mode = Byte; // Byte is the standard for urls
+    string Message = ""; 
 
 
     // allocate an dynamic array initialized for version 6 QRcode for the standard url
@@ -73,7 +74,7 @@ private:
 
 
 
-    //                                insert a funciton to be the condition of the mask (lamba)
+    //                                insert a funciton to be the condition of the mask (lambda)
     void HelpApplyMaskWithCondition( bool (*condition) (int , int)) {
 
         
@@ -106,18 +107,18 @@ private:
 
         
 
-        // MaskPatterns[Veritasium] Visual representation for how each mask looks
+        // MaskPatterns[Veritasium].png Visual representation for how each mask looks
         // https://www.thonky.com/qr-code-tutorial/mask-patterns
 
 
-        // for every mask i define a lamba function for the condition in its respective case to save code space
+        // for every mask i define a lambda function for the condition in its respective case to save code space
         switch (Mask){
 
             //checkerboard pattern
             case 0: {
 
                 //(row + column) mod 2 == 0
-                // define the condition using a lamba funciton
+                // define the condition using a lambda funciton
                 auto function = [] (int row , int column) { return (row + column) % 2 == 0 ;} ;
 
                 HelpApplyMaskWithCondition(function);
@@ -129,7 +130,7 @@ private:
             // every even horizontal row is flipped
             case 1: {
                 //(row) mod 2 == 0
-                // define the condition using a lamba funciton
+                // define the condition using a lambda funciton
                 auto function = [] (int row , int column) { return row  % 2 == 0 ;} ;
 
                 HelpApplyMaskWithCondition(function);
@@ -140,7 +141,7 @@ private:
             //every third column is inverted
             case 2: {
                 //(column) mod 3 == 0
-                // define the condition using a lamba funciton
+                // define the condition using a lambda funciton
                 auto function = [] (int row , int column) { return column % 3 == 0 ;} ;
                 HelpApplyMaskWithCondition(function);
 
@@ -515,25 +516,25 @@ private:
     }
 
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    
 
 
 public:
 
-    // insert your own QRcode Size
-    //https://www.qrcode.com/en/about/version.html
-    QRcode(unsigned short QRcodeVersion) : DimensionQRcode((QRcodeVersion-1)*4 + 21) , Version(QRcodeVersion) {InitialiseQRcode();}
-    
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // TODO : automatic with the string input 
+    // Initialisation 
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // TODO : add what error correction you want 
-
-    // TODO : byte Alpha and kanji? 
-
-    // TODO : all the combination of signateurs
-
+    //Default QRcode setting for this class
+    /*
+    short DimensionQRcode= 41;
+    unsigned short Version = 6; // (max version is 40)
+    Errorcorrection ErrorCorrection = L; // Light easiest
+    QRcodeMode Mode = byte; // byte is the standard for urls
+    string Message = ""; 
+    */
 
     // initiations of the QRcode  (default version 6)
     QRcode(){
@@ -542,8 +543,69 @@ public:
        
     }//QRcode
 
+   
+    // insert your own QRcode Version [2-40]
+    //https://www.qrcode.com/en/about/version.html
+    QRcode(unsigned short QRcodeVersion) : DimensionQRcode((QRcodeVersion-1)*4 + 21) , Version(QRcodeVersion) {InitialiseQRcode();}
+    
+    //DEBUG (NO MESSAGE)
+    // TODO : add what error correction you want 
+    QRcode(Errorcorrection ErrorcorrectionInput) : ErrorCorrection(ErrorcorrectionInput) {InitialiseQRcode();}
+
+    // DEBUG (NO MESSAGE)
+    // change just the QRcode 
+    QRcode(QRcodeMode QRcodeModeInput) : Mode(QRcodeModeInput) {InitialiseQRcode();}
+
+    //DEBUG (ALPHANUMERIC ONLY)
+    // TODO : automatiquly scale what is the best QRcode mode for the string lenght
+    //  Default setting with just the string input 
+    QRcode(string stringInput) : Message(stringInput) {InitialiseQRcode();}
+
+    
 
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Double input
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // L and Alphanumeric 
+    QRcode(unsigned short QRcodeVersion , string stringInput) : DimensionQRcode((QRcodeVersion-1)*4 + 21) , Version(QRcodeVersion) , Message(stringInput) {InitialiseQRcode();}
+
+    // No input and alphanumeric
+    QRcode(unsigned short QRcodeVersion, Errorcorrection ErrorcorrectionInput) : DimensionQRcode((QRcodeVersion-1)*4 + 21) , Version(QRcodeVersion) {InitialiseQRcode();}
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Triple input
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    // TODO : if the user choses a incompatible version or string check and stop the execusion of the class
+    // use stdexept to give a messge and quit the proggrame?
+
+    // full control on what QRcode you want
+    QRcode(unsigned short QRcodeVersion, Errorcorrection ErrorcorrectionInput , QRcodeMode QRcodeModeInput ,string stringInput) : 
+        DimensionQRcode((QRcodeVersion-1)*4 + 21) , Version(QRcodeVersion) , ErrorCorrection(ErrorcorrectionInput) , Mode(QRcodeModeInput), Message(stringInput) 
+    
+        {InitialiseQRcode();}
+
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    //TODO : add more customisation to initialise the QRcode 
+    // if the user wants to specifie what they want to do with the QRcode (mode, ECC and version) it could be a const in the class and will always take priority 
+    // For now i will focus on making something that works so i will do (L, Byte and version 6) for the default because its the most rational for this project 
+    // L because its a computer output and it cant really get damaged, Byte because we are doing urls and their can be a lot of symbols :P and version 6 because their is just one alignment pattern and 
+    //it wont be a headache for when you place the message in the QRcode and when you get to Version 7 you need to add "Reserve the Version Information Area" [https://www.thonky.com/qr-code-tutorial/module-placement-matrix]
+
+
+    //TODO function to input a string in the QRcode
+
+
+
+    
     // print the occupied squares of the QRcode
     void printOccupyDebug(){
 
@@ -605,6 +667,12 @@ public:
         cout << "printQRcodeDebug() \n" ;
         cout << "////////////////////////////////////////////////////////////////////////////////////////////////" << endl << endl;
 
+        cout << "Dimensions : " << DimensionQRcode << endl;
+        cout << "Version : " << Version << endl;
+        cout << "ErrorCorrection : " << ErrorCorrection << endl;
+        cout << "QRcodeMode : " << Mode << endl;
+        cout << "Message : " << Message << endl << endl << endl << endl;
+        
         // counters for dimensions
         int Rows = 0;
         int Columns = 0;

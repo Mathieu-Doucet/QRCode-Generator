@@ -22,8 +22,14 @@ int main(){
     */
 
     //  https://www.qrcode.com/en/about/version.html
-    unsigned short version = 10;
-    QRcode TestQRcode(version);
+
+
+    Errorcorrection Errorcorrection = Q;
+    QRcodeMode QRcodeModeInput = Numeric;
+    string message = "HELLO WORLD";
+
+    unsigned short version = 2;
+    QRcode TestQRcode(version, Errorcorrection, QRcodeModeInput , message);
 
     TestQRcode.printOccupyDebug();
 
