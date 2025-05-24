@@ -12,6 +12,10 @@ How many characters can fit in each version of a QRcode
 https://www.thonky.com/qr-code-tutorial/character-capacities
 
 
+Size and howmany characteurs can fit in a QRcode
+https://www.qrcode.com/en/about/version.html
+
+
 -Error correction tables Blocks and groups
 https://www.thonky.com/qr-code-tutorial/error-correction-table
 https://www.thonky.com/qr-code-tutorial/log-antilog-table
@@ -142,6 +146,41 @@ vector<vector<short>> AlignmentTable = {
     {6 ,32,58,84,110,136 ,162 },//38
     {6 ,36,54,82,110,138 ,166 },//39
     {6 ,30,58,86,114,142 ,170 }//40
+};
+
+
+
+
+// for the format string information you need to calculte the ECC for the 5 bits and do a copy instead of copying it ill make a table
+/*
+    L	0	111011111000100
+    L	1	111001011110011
+    L	2	111110110101010
+    L	3	111100010011101
+    L	4	110011000101111
+    L	5	110001100011000
+    L	6	110110001000001
+    L	7	110100101110110
+
+*/
+
+vector<vector<bool>> FormatStringsTable = {
+
+    {1,1,1,0,1,1,1,1,1,0,0,0,1,0,0}, //L-0     mattbatwings Redstone QRcode
+    {1,1,1,0,0,1,0,1,1,1,1,0,0,1,1}, //L-1	
+    {1,1,1,1,1,0,1,1,0,1,0,1,0,1,0}, //L-2	
+    {1,1,1,1,0,0,0,1,0,0,1,1,1,0,1}, //L-3	
+    {1,1,0,0,1,1,0,0,0,1,0,1,1,1,1}, //L-4	
+    {1,1,0,0,0,1,1,0,0,0,1,1,0,0,0}, //L-5	
+    {1,1,0,1,1,0,0,0,1,0,0,0,0,0,1}, //L-6
+    {1,1,0,1,0,0,1,0,1,1,1,0,1,1,0}, //L-7
+    // /* future debugging
+    {1,0,1,1,1,1,0,0,1,1,1,1,1,0,0}, //M-2 [Veritasium video]
+    {0,1,0,1,1,1,0,1,1,0,1,1,0,1,0} // Final QRcode in thonky v1-Q-6 helloworld example (mask patern 6)
+    // */
+
+
+
 };
 
 

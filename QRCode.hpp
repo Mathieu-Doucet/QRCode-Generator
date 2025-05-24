@@ -10,17 +10,16 @@ using namespace std;
 
 class QRcode : public QRcodeHeader{
 
-public:
-
-string URL;
 
 private:
 
+    //TODO make the parameters changable with the initiators? (first make something that works)
     // Go look QRCodeHelp.hpp or the documentation on the Variables
-    short DimensionQRcode= 41;
-    unsigned short Version = 6; // (max version is 40)
-    Errorcorrection ErrorCorrection = L; // Light for now
-    QRcodeMode Mode = Byte; // Byte is the standard for urls
+    const short DimensionQRcode= 41;
+    const unsigned short Version = 6; // (max version is 40)
+    const Errorcorrection ErrorCorrection = H; // Light for now
+    const QRcodeMode Mode = Byte; // Byte is the standard for urls
+    short MaskPattern = 8; // can change the mask pattern (every 3rd column inverted) // (column) mod 3 == 0
     string Message = ""; 
 
 
@@ -105,7 +104,7 @@ private:
 
     void ApplyMaskPattern(short Mask){
 
-        
+        // mask patterns dont invert the Occupied spaces (finding patterns , separators , allignment patters, timing patterns and format strings)
 
         // MaskPatterns[Veritasium].png Visual representation for how each mask looks
         // https://www.thonky.com/qr-code-tutorial/mask-patterns
@@ -513,7 +512,133 @@ private:
         }
         
 
+        //debug
+        AddFormatString(MaskPattern);
+
+
+
+    }//InitialiseQRcode
+
+
+    
+
+    //https://www.thonky.com/qr-code-tutorial/format-version-tables
+
+    //TODO : Generate Error Correction Bits for Format String (ECC) [https://www.thonky.com/qr-code-tutorial/format-version-information]
+
+    /*
+    Because we are just using ECC L *for now* we dont really have to calculate the ECC bit because of the table given (table in QRcodehelp.hpp)
+    L	0	111011111000100
+    L	1	111001011110011
+    L	2	111110110101010
+    L	3	111100010011101
+    L	4	110011000101111
+    L	5	110001100011000
+    L	6	110110001000001
+    L	7	110100101110110
+    
+    */
+    
+    //FormatStringLayout.png for a visual Reference [https://www.thonky.com/qr-code-tutorial/format-version-information]
+    void AddFormatString(short MaskPatternInput){
+
+        // always the same place
+        CoordXY TopLeftCursor(0,8);
+        //changes how low with the dimension
+        CoordXY BottomLeftCursor(8,DimensionQRcode-1);
+
+        vector<bool> FormatString = FormatStringsTable[MaskPatternInput];
+
+
+        for (int Bit = 0 ; Bit <15 ; ++Bit){
+
+            //encountered the vertical timing pattern
+            if(Bit == 6){
+                TopLeftCursor.X++;
+            }
+            //encountered the horizontal timing pattern
+            if (Bit == 9){
+                TopLeftCursor.Y--;
+            }
+
+            //DarkSquare in the bottom left [https://www.youtube.com/watch?v=w5ebcowAJD8][14:00] Veritatium 
+            if (Bit == 7){
+                CoordXY BlackSquare(8,DimensionQRcode-8);
+                InitialiseBlack(BlackSquare);
+                OccupySquare(BlackSquare);
+
+                //Go to the TopRight finding pattern for the bottomleft cursor[postion 7]
+                BottomLeftCursor.X = DimensionQRcode-8;
+                BottomLeftCursor.Y = 8;
+    
+                
+            }
+
+
+            // Place the Bit ()
+            if(FormatString[Bit] == 1) {
+                InitialiseBlack(TopLeftCursor); 
+                InitialiseBlack(BottomLeftCursor);
+            }
+            //if in the future i want to overwrite / change QRcode
+            else{
+                InitialiseWhite(TopLeftCursor);
+                InitialiseWhite(BottomLeftCursor);
+            }
+            //always occupy (wont be affected by the mask pattern)
+            OccupySquare(TopLeftCursor);
+            OccupySquare(BottomLeftCursor);
+
+
+            // change the cursor positions
+
+            //Top right move horizontaly and Bottom left Veritcaly
+            if(Bit < 7){
+
+                TopLeftCursor.X++;
+                BottomLeftCursor.Y--;
+
+            }
+
+            //Top right move Vertically and Bottom left horizontaly
+            else{
+                
+                TopLeftCursor.Y--;
+                BottomLeftCursor.X++;
+
+            }
+
+        }
+
+
+
+
     }
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Data encoding
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    //https://www.thonky.com/qr-code-tutorial/data-encoding
+
+
+    //TODO : Determine the Smallest Version for the Data 
+
+    //Step 1: Choose the Error Correction Level (choosed level L because a computer wont corrupted data that much)
+
+    //Step 2: Determine the Smallest Version for the Data
+    //with L, version 6 you can have 134 characteurs
+
+    //Step 3: Add the Mode Indicator
+
+
+
+
+
 
 
     
@@ -536,14 +661,9 @@ public:
     string Message = ""; 
     */
 
-    // initiations of the QRcode  (default version 6)
-    QRcode(){
+    
 
-        InitialiseQRcode();
-       
-    }//QRcode
-
-   
+    /*
     // insert your own QRcode Version [2-40]
     //https://www.qrcode.com/en/about/version.html
     QRcode(unsigned short QRcodeVersion) : DimensionQRcode((QRcodeVersion-1)*4 + 21) , Version(QRcodeVersion) {InitialiseQRcode();}
@@ -594,6 +714,22 @@ public:
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    */
+
+    //DEBUG default (L version 6 and bytemode)
+    // TODO : automatiquly scale what is the best QRcode mode for the string lenght
+    //  Default setting with just the string input 
+    QRcode(string stringInput) : Message(stringInput) {InitialiseQRcode();}
+
+
+    // initiations of the QRcode  (default)
+    QRcode(){
+
+        InitialiseQRcode();
+       
+    }//QRcode
+    //**************************************************************** 
+    
     //TODO : add more customisation to initialise the QRcode 
     // if the user wants to specifie what they want to do with the QRcode (mode, ECC and version) it could be a const in the class and will always take priority 
     // For now i will focus on making something that works so i will do (L, Byte and version 6) for the default because its the most rational for this project 
