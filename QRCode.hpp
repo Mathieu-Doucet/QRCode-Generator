@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -19,7 +20,7 @@ private:
     const unsigned short Version = 6; // (max version is 40)
     const Errorcorrection ErrorCorrection = H; // Light for now
     const QRcodeMode Mode = Byte; // Byte is the standard for urls
-    short MaskPattern = 8; // can change the mask pattern (every 3rd column inverted) // (column) mod 3 == 0
+    short MaskPattern = 3; // can change the mask pattern (every 3rd column inverted) // (column) mod 3 == 0
     string Message = ""; 
 
 
@@ -29,10 +30,17 @@ private:
     // Allocate the same QRcode Size for places that CANT be modified because of the Function paterns (1 in the Array means occupied)
     vector<vector<bool>> OccupiedVector = vector<vector<bool>>(DimensionQRcode,(vector<bool>(DimensionQRcode, 0)));
 
+    //Data encoding 
+    // TODO make modular [https://www.thonky.com/qr-code-tutorial/error-correction-table]
+    // 134 charcters and +2 bytes for padding, character count and QRcode mode = 136 bytes
+    //vector<bool> MessageDataBits = vector<bool>(136*8, 0);
+    vector<bool> MessageDataBits;
+    
+
 
     // ////////////////////////////////////////////////////////////////////////////////////////////////
 
-
+     
     // double cout the char to make the the QRcode in the terminal a square
     void printBlack(){
         cout << "░░";
@@ -512,7 +520,7 @@ private:
         }
         
 
-        //debug
+        //debug mask
         AddFormatString(MaskPattern);
 
 
@@ -617,29 +625,122 @@ private:
 
 
 
-
+    
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Data encoding
     ////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    void AppendToDataBits(uint8_t Character){
+
+        //using big edian so the first bit is 2^7
+        uint8_t Checker = 0b10000000 ; 
+
+        for (int Bit = 7 ; Bit >= 0 ; --Bit){
+
+            // if the bit is presently a 1 in the charcter 
+            if ((Checker & Character) > 0){
+                MessageDataBits.push_back(true);
+            }
+            else{
+                MessageDataBits.push_back(false);
+            }
+
+            // move the bit to the right
+            Checker = (Checker >> 1);
+
+        }
 
 
+    }
+
+
+
+    //https://www.youtube.com/watch?v=ZizmvuZ3EFk [7:52] 
     //https://www.thonky.com/qr-code-tutorial/data-encoding
-
 
     //TODO : Determine the Smallest Version for the Data 
 
     //Step 1: Choose the Error Correction Level (choosed level L because a computer wont corrupted data that much)
 
     //Step 2: Determine the Smallest Version for the Data
-    //with L, version 6 you can have 134 characteurs
+    //with L, version 6 you can have 134 of used characteurs 
 
-    //Step 3: Add the Mode Indicator
-
-
+    
 
 
+   
+
+    void MakeTheDataString (){
+
+        //TODO make the mode modular (Alpha, numeric, byte)
+
+        //firt four bits is the QRcode mode (Byte mode for default 0100)
+        //Step 3: Add the Mode Indicator
+        uint8_t Checker = Mode;
+        
+        // 1000 -> 0100 -> 0010 -> 0001 
+        for (int Bit = 8 ; Bit > 0 ; Bit = Bit >> 1){
+
+            // if the bit is presently a 1 in the mode then place one
+            if ((Bit & Checker) > 0){
+                MessageDataBits.push_back(true);
+            }
+            else{
+                MessageDataBits.push_back(false);
+            }
+        }
 
 
+         ///*
+        //Add the lenght of the message in the data string (8bits long)
+        // Step 4: Add the Character Count Indicator
+
+
+        uint8_t CharacterCount = Message.length();
+        AppendToDataBits(CharacterCount);
+
+        // add the characteurs to the Data String
+
+        //Step 5: Encode Using the Selected Mode
+
+        for (int Character = 0 ;Character < Message.size() ; ++Character ){
+
+            AppendToDataBits(uint8_t(Message[Character]));
+        }  
+
+        // Add a Terminator of 0s if Necessary
+        // TODO : *if Necessary* make a check if you are in numeric or other modes?
+
+        // with byte mode you always add 4 0's to make it a multiple of 8
+        for (int i = 0 ; i <4 ; ++i){MessageDataBits.push_back(false);}
+
+
+        //TODO : to expand the QRcode function you need to know when to stop adding padding make a table using this link
+        // https://www.thonky.com/qr-code-tutorial/error-correction-table 
+        // 6-L = 136 data codewords 
+        // padding bytes = 136 - 2 - Message.size()     [2 is for the mode character count and 4 0's at the end of the message]
+
+        //Add Pad Bytes if the String is Still too Short
+        int PaddingByte = DataCodeWord[Version-1][0] -2 - Message.size();
+
+        // padding patterns
+                // 11101100 00010001
+        uint8_t Pair = 236;
+        uint8_t Odd = 17;
+
+        for (int i = 0 ; i < PaddingByte ; ++i){
+
+            if (i % 2 == 0){
+                AppendToDataBits(Pair);
+            }
+            else{
+                AppendToDataBits(Odd);
+
+            }
+
+        }
+        //*/
+    }
 
     
 
@@ -715,6 +816,12 @@ public:
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     */
+
+     // full control on what QRcode you want
+     QRcode(unsigned short QRcodeVersion, Errorcorrection ErrorcorrectionInput , QRcodeMode QRcodeModeInput ,string stringInput , short mask) : 
+     DimensionQRcode((QRcodeVersion-1)*4 + 21) , Version(QRcodeVersion) , ErrorCorrection(ErrorcorrectionInput) , Mode(QRcodeModeInput), Message(stringInput) , MaskPattern(mask) 
+ 
+     {InitialiseQRcode();}
 
     //DEBUG default (L version 6 and bytemode)
     // TODO : automatiquly scale what is the best QRcode mode for the string lenght
@@ -808,7 +915,25 @@ public:
         cout << "ErrorCorrection : " << ErrorCorrection << endl;
         cout << "QRcodeMode : " << Mode << endl;
         cout << "Message : " << Message << endl << endl << endl << endl;
-        
+
+
+        MakeTheDataString();
+
+        //DEBUG Data bits
+        /////////////////////////////////////////////////
+        cout << "DataBit message string : " << endl;
+        for (int i = 0 ; i < MessageDataBits.size() ; ++i){
+
+            cout << (MessageDataBits[i] == true ) ? '1' : '0' ;
+            if (i != 0 && (i+1) % 8 == 0 ){cout << " ";} // space out every byte
+
+            if (i != 0 && (i+1) % 80 == 0) {cout << endl;} // new line every 10 byte
+        }
+        cout << endl << endl << endl;
+
+        /////////////////////////////////////////////////
+
+
         // counters for dimensions
         int Rows = 0;
         int Columns = 0;
@@ -866,7 +991,8 @@ public:
         }
 
 
-}// PrintQRcode
+    }// PrintQRcode
+
 
 };//QRcode class
 

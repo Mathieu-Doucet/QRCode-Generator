@@ -164,6 +164,7 @@ vector<vector<short>> AlignmentTable = {
 
 */
 
+//in QRcode.hpp uses [0 for first]
 vector<vector<bool>> FormatStringsTable = {
 
     {1,1,1,0,1,1,1,1,1,0,0,0,1,0,0}, //L-0     mattbatwings Redstone QRcode
@@ -183,6 +184,24 @@ vector<vector<bool>> FormatStringsTable = {
 
 };
 
+
+
+
+//https://www.thonky.com/qr-code-tutorial/error-correction-table
+
+vector<vector<int>> DataCodeWord = {
+
+                    //version - ECC
+    	{19	,7	,1,	19},//1-L
+    	{34	,10	,1,	34},//2-L
+    	{55	,15	,1,	55}, //3-L [Mattbatwings]
+    	{80	,20	,1,	80},//4-L
+    	{108,26, 1,	108},//5-L
+    	{136,18, 2,	68},//6-L [Moi]
+    	{28	,16	,1,	28},//2-M [Veritasium]
+        {13,13,	1,	13} //// Final QRcode in thonky v1-Q helloworld example 
+
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
