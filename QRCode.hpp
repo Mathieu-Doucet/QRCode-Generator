@@ -53,6 +53,13 @@ private:
         OccupiedVector[Coords.Y][Coords.X] = 1;
     }
 
+    bool SquareIsOccupied(CoordXY Coords){
+        if (OccupiedVector[Coords.Y][Coords.X] == 1){
+            return 1;
+        }
+        return 0;
+    }
+
     //place a square in the QRcode 
     void InitialiseBlack(CoordXY Coords){
         //place is not occupied
@@ -407,6 +414,41 @@ private:
 
     }
 
+    //Step 3: Add the alignment patterns
+    //https://www.thonky.com/qr-code-tutorial/module-placement-matrix
+
+    bool AlignmentPatternIsSafe (CoordXY Middle, const vector<vector<bool>> & FunctionPattern){
+
+
+        CoordXY TopLeftAlignment(Middle.X - 2, Middle.Y - 2);
+        CoordXY TopRightAlignment(Middle.X - 2, Middle.Y + 2);
+        CoordXY BottomLeftAlignment(Middle.X + 2, Middle.Y + 2);
+        
+        
+        // TODO: Optimisation posible?
+        
+        if (FunctionPattern[Middle.Y][Middle.X] == 1){
+            return false;
+        }
+    
+        else if (FunctionPattern[TopLeftAlignment.Y][TopLeftAlignment.X] == 1){
+            return false;
+        }
+    
+        else if (FunctionPattern[TopRightAlignment.Y][TopRightAlignment.X] == 1){
+            return false;
+        }
+    
+        else if (FunctionPattern[BottomLeftAlignment.Y][BottomLeftAlignment.X] == 1){
+            return false;
+        }
+    
+        return true;
+        
+    
+    
+        }
+    
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -742,6 +784,112 @@ private:
         //*/
     }
 
+    // function to move the datastring cursor along the QRcode to place the data on the QRcode
+    // when its call
+
+
+    bool OutofBounds (CoordXY Cursor){
+        if (Cursor.Y >= DimensionQRcode || Cursor.Y < 0){
+            return true;
+        }
+        return false;
+    }
+
+    //TODO: Clean up the if statements to make it readable?
+    //Step 6: Place the Data Bits [https://www.thonky.com/qr-code-tutorial/module-placement-matrix]
+
+    //This function will path the ENTIRE QRcode in the ZigZag pattern show in [data-bit-proggression.png] and than will return if the bit can be placed or not
+    bool NextSquare(CoordXY &Cursor, bool &Upwards){
+
+        //upwards [Look at upwards.png]
+        if (Upwards == 1){
+
+            // the cursor is on the right and need to move to the left
+            if (Cursor.X % 2 == 0 ){
+                Cursor.X--;
+            }
+            //cursor is on the left and need to move top right
+            else{
+
+                // check if you can go up?
+                CoordXY Test(Cursor.X+1,Cursor.Y-1);
+                //if you are out of bounds you need to change dirrection
+                if(OutofBounds(Test)){
+                    Upwards = !Upwards;
+                    Cursor.X--;
+                }
+                //preceed with top right
+                else{
+                    Cursor.X++;
+                    Cursor.Y--;
+                }
+            }
+
+
+        }
+        //Downwards[Look at downwards.png]
+        else{
+            // the cursor is on the right and need to move to the left
+            if (Cursor.X % 2 == 0 ){
+                Cursor.X--;
+            }
+            //cursor is on the left and need to move top right
+            else{
+
+                // check if you can go up?
+                CoordXY Test(Cursor.X+1,Cursor.Y+1);
+                //if you are out of bounds you need to change dirrection
+                if(OutofBounds(Test)){
+                    Upwards = !Upwards;
+                    Cursor.X--;
+                }
+                //preceed with top right
+                else{
+                    Cursor.X++;
+                    Cursor.Y++;
+                }
+            }
+        }
+
+        // Can you place this square?
+        if(SquareIsOccupied(Cursor)){
+            return false;
+        }
+        //can be initialised
+        return true;
+
+    }
+
+    //TODO : add the ecc squares with the data string?
+    //for now will just be the data string?
+
+    //Step 6: Place the Data Bits [https://www.thonky.com/qr-code-tutorial/module-placement-matrix]
+    void PlaceTheDataSquares(){
+
+        //start bottom right and snakes up and down to place the data
+        CoordXY DataCursor(DimensionQRcode-2, DimensionQRcode);
+        bool Upward = 1;
+        for(int Bit = 0 ; Bit < MessageDataBits.size() ; ++Bit){
+            if(NextSquare(DataCursor , Upward)){
+                if(MessageDataBits[Bit] == 1){
+                    InitialiseBlack(DataCursor);
+                }
+                else{
+                    InitialiseWhite(DataCursor);
+                }
+            }
+            //cant place the bit than delay the for loop which give a free NextSquare
+            else{
+                Bit--;
+            }
+            
+        }
+
+
+    }
+
+
+
     
 
 
@@ -828,7 +976,7 @@ public:
     //  Default setting with just the string input 
     QRcode(string stringInput) : Message(stringInput) {InitialiseQRcode();}
 
-
+    
     // initiations of the QRcode  (default)
     QRcode(){
 
@@ -880,7 +1028,7 @@ public:
     
         }
         cout << endl;
-    
+        
         // Normal PrintQRcode()
         for (int i = 0; i< OccupiedVector.size() ; i++ ){
             
@@ -918,6 +1066,7 @@ public:
 
 
         MakeTheDataString();
+        PlaceTheDataSquares();
 
         //DEBUG Data bits
         /////////////////////////////////////////////////

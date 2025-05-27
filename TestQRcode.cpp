@@ -46,15 +46,18 @@ int main(){
     
 
     // well documented video for my testing 
-
+    // /*
     Errorcorrection Errorcorrection = L;
     QRcodeMode QRcodeModeInput = Byte;
-    string message = "https://www.youtube.com/mattbatwings";
+    //string message = "https://www.youtube.com/mattbatwings";
+    string message = "abc";
+
     unsigned short version = 3;
     //unsigned short version = 6;
     short mask = 0;
     QRcode TestQRcode(version, Errorcorrection, QRcodeModeInput , message , mask);
-
+    // */
+    
 
 
 

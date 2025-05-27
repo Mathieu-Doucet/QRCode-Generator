@@ -29,6 +29,17 @@ https://www.thonky.com/qr-code-tutorial/alphanumeric-table
 -Alignment pattern middle coordanates table 
 https://www.thonky.com/qr-code-tutorial/alignment-pattern-locations
 
+
+
+I built a QR code with my bare hands to see how it works - Veritasium 
+https://www.youtube.com/watch?v=ZizmvuZ3EFk
+
+
+ I built a QR code with redstone to find out how it works - mattbatwings
+https://www.youtube.com/watch?v=w5ebcowAJD8
+
+
+
 */
 
 
@@ -53,42 +64,6 @@ struct CoordXY{
     }
 };
 
-
-
-//Step 3: Add the alignment patterns
-//https://www.thonky.com/qr-code-tutorial/module-placement-matrix
-
-bool AlignmentPatternIsSafe (CoordXY Middle, const vector<vector<bool>> & FunctionPattern){
-
-
-    CoordXY TopLeftAlignment(Middle.X - 2, Middle.Y - 2);
-    CoordXY TopRightAlignment(Middle.X - 2, Middle.Y + 2);
-    CoordXY BottomLeftAlignment(Middle.X + 2, Middle.Y + 2);
-
-
-    // TODO: Optimisation posible?
-
-    if (FunctionPattern[Middle.Y][Middle.X] == 1){
-        return false;
-    }
-
-    else if (FunctionPattern[TopLeftAlignment.Y][TopLeftAlignment.X] == 1){
-        return false;
-    }
-
-    else if (FunctionPattern[TopRightAlignment.Y][TopRightAlignment.X] == 1){
-        return false;
-    }
-
-    else if (FunctionPattern[BottomLeftAlignment.Y][BottomLeftAlignment.X] == 1){
-        return false;
-    }
-
-    return true;
-    
-
-
-}
 
 //https://www.thonky.com/qr-code-tutorial/format-version-information 
 //Error correction section says L = 1 , M = 0 , Q = 3 and H = 2
@@ -186,6 +161,7 @@ vector<vector<bool>> FormatStringsTable = {
 
 
 
+//TODO : make a 2D array to for the 4 error correction if i want to do them in the future(L,M,Q,H)
 
 //https://www.thonky.com/qr-code-tutorial/error-correction-table
 
@@ -201,7 +177,50 @@ vector<vector<int>> DataCodeWord = {
     	{28	,16	,1,	28},//2-M [Veritasium]
         {13,13,	1,	13} //// Final QRcode in thonky v1-Q helloworld example 
 
+
+
+        //if i want to use bigger version with ECC L
+        /*
+        
+            {156	,20,	2,	78},        //7-L	
+            {194	,24,	2,	97	},      //8-L	
+            {232	,30,	2,	116	},      //9-L	
+            {274	,18,	2,	68,	2,	69},//10-L
+        	{324	,20,	4,	81},        //11-L
+        	{370	,24,	2,	92,	2,	93},    //12-L
+        	{428	,26,	4,	107},	         //13-L
+        	{461	,30,	3,	115,	1,	116},//14-L	
+        	{523	,22,	5,	87,	1,	88},     //15-L
+        	{589	,24,	5,	98,	1,	99},     //16-L
+        	{647	,28,	1,	107,	5,	108},//17-L
+        	{721	,30,	5,	120,	1,	121},//18-L 
+        	{795	,28,	3,	113,	4,	114},//19-L
+        	{861	,28,	3,	107,	5,	108},//20-L
+        	{932	,28,	4,	116,	4,	117},//21-L
+        	{1006	,28,	2,	111,	7,	112},//22-L
+        	{1094	,30,	4,	121,	5,	122},//23-L
+        	{1174	,30,	6,	117,	4,	118},//24-L
+        	{1276	,26,	8,	106,	4,	107},//25-L
+        	{1370	,28,	10,	114,	2,	115},//26-L 	
+        	{1468	,30,	8,	122,	4,	123},//27-L 	
+        	{1531	,30,	3,	117,	10,	118},//28-L
+        	{1631	,30,	7,	116,	7,	117},//29-L
+        	{1735	,30,	5,	115,	10,	116},//30-L
+        	{1843	,30,	13,	115,	3,	116},//31-L
+        	{1955	,30,	17,	115},	         //32-L
+        	{2071	,30,	17,	115,	1,	116},//33-L
+        	{2191	,30,	13,	115,	6,	116},//34-L
+        	{2306	,30,	12,	121,	7,	122},//35-L
+        	{2434	,30,	6,	121,	14,	122},//36-L
+        	{2566	,30,	17,	122,	4,	123},//37-L
+        	{2702	,30,	4,	122,	18,	123},//38-L
+        	{2812	,30,	20,	117,	4,	118},//39-L
+        	{2956	,30,	19,	118,	6,	119} //40-L
+        
+        //*/
+
 };
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
