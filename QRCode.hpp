@@ -890,6 +890,60 @@ private:
 
 
 
+
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    //Error Correction
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    //You need to convert the the Datastring into codeword (one byte long segments) for the error correction part
+    vector<uint8_t> DataCodeWordToUint8_t(){
+
+        //initialiseTotal Number of Data Codewords for this Version to 0
+        vector<uint8_t> Output(DataCodeWord[Version-1][0] , 0);
+        int OutputIterator = 0;
+
+        uint8_t PowerOf2 = 128;
+        for(int Bit = 0 ; Bit < MessageDataBits.size() ; ++Bit){
+
+            if (MessageDataBits[Bit]){
+                Output[OutputIterator] +=  PowerOf2;
+            }
+            
+            PowerOf2 = PowerOf2 >> 1;
+
+            //if you are at bit 7 that means you are at 2^0 of the OutputIterator, So next Bit is the 2^8 of the next OutputIterator
+            if ((Bit+1)% 8 == 0 ){
+                OutputIterator++;
+                PowerOf2 = 128; // reset the Big edian
+            }
+
+        }
+
+        return Output;
+
+    }
+
+    void DebugPrintUint8_t(vector<uint8_t>Test){
+
+        for (auto number : Test ){
+
+            cout << int(number) << " ";
+        }
+    
+        cout << endl << endl;
+
+
+    }
+    
     
 
 
@@ -1079,6 +1133,13 @@ public:
             if (i != 0 && (i+1) % 80 == 0) {cout << endl;} // new line every 10 byte
         }
         cout << endl << endl << endl;
+
+
+
+        vector<uint8_t> Test = DataCodeWordToUint8_t();
+
+        DebugPrintUint8_t(Test);
+
 
         /////////////////////////////////////////////////
 
